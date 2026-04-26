@@ -1,4 +1,1 @@
 Flask
-numpy
-scikit-fuzzy
-experta
