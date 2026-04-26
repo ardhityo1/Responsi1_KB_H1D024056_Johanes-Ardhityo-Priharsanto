@@ -1,6 +1,6 @@
 Aplikasi ini menggunakan **Logika Fuzzy** dan **Sistem Pakar** untuk memberikan rekomendasi tiket kereta api terbaik berdasarkan harga, durasi perjalanan, dan waktu tunggu.
 
-##Letak Logika AI di Kode (`app.py`)
+## Letak Logika AI di Kode (`app.py`)
 
 Rincian letak bagian logika fuzzy dan logika sistem pakar
 
