@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartRail — Asisten Efisiensi Perjalanan Kereta</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --surface2: #f9fafb;
+  --border: rgba(0,0,0,0.09);
+  --border2: rgba(0,0,0,0.18);
+  --text: #111827;
+  --text-muted: #6b7280;
+  --text-subtle: #9ca3af;
+  --accent: #0d9488;
+  --accent-light: #e6f4f2;
+  --accent-mid: #0f766e;
+  --green: #16a34a;
+  --green-bg: #f0fdf4;
+  --green-border: #bbf7d0;
+  --amber: #b45309;
+  --amber-bg: #fffbeb;
+  --amber-border: #fde68a;
+  --red: #dc2626;
+  --red-bg: #fef2f2;
+  --red-border: #fecaca;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+}
+[data-theme="dark"] {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface2: #20243a;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-subtle: #64748b;
+  --accent: #14b8a6;
+  --accent-light: #0d2926;
+  --accent-mid: #0f766e;
+  --green: #4ade80;
+  --green-bg: #042a12;
+  --green-border: #166534;
+  --amber: #fbbf24;
+  --amber-bg: #1c1005;
+  --amber-border: #78350f;
+  --red: #f87171;
+  --red-bg: #1c0808;
+  --red-border: #7f1d1d;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 10px rgba(0,0,0,0.5);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.55;transition:background .2s,color .2s;}
+
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm);}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-icon{width:34px;height:34px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-name{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.3px;}
+.logo-sub{font-size:10px;color:var(--text-muted);margin-top:1px;}
+.header-right{display:flex;align-items:center;gap:8px;}
+.btn-icon{height:34px;padding:0 12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text-muted);font-family:inherit;font-weight:500;gap:5px;transition:all .15s;white-space:nowrap;}
+.btn-icon:hover{background:var(--surface);color:var(--accent);border-color:var(--accent);}
+.btn-theme{width:34px;padding:0;}
+
+.main{max-width:1180px;margin:0 auto;padding:20px 16px 80px;display:grid;grid-template-columns:272px 1fr;gap:18px;align-items:start;}
+@media(max-width:800px){.main{grid-template-columns:1fr;}}
+
+.sidebar{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;position:sticky;top:74px;}
+.section-head{display:flex;align-items:center;gap:6px;margin-bottom:12px;}
+.section-title{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);}
+.section-tag{background:var(--accent-light);color:var(--accent);padding:1px 7px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;border:1px solid var(--accent-light);}
+.filter-block{margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.filter-block:last-of-type{border-bottom:none;margin-bottom:12px;}
+.filter-label{font-size:12px;font-weight:600;color:var(--text);margin-bottom:7px;display:block;}
+
+select{width:100%;padding:7px 28px 7px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;cursor:pointer;margin-bottom:7px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;transition:border-color .15s;}
+select:focus{outline:none;border-color:var(--accent);}
+.check-group{display:flex;flex-direction:column;gap:4px;}
+.check-item{display:flex;align-items:center;gap:8px;cursor:pointer;padding:5px 7px;border-radius:7px;transition:background .12s;font-size:12.5px;}
+.check-item:hover{background:var(--surface2);}
+.check-item input{width:14px;height:14px;accent-color:var(--accent);cursor:pointer;}
+.toggle-group{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.toggle-btn{padding:7px 8px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text-muted);font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:all .15s;}
+.toggle-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
+
+.slider-group{margin-bottom:13px;}
+.slider-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.slider-lbl{font-size:12px;color:var(--text-muted);}
+.slider-val{font-size:12px;font-weight:700;color:var(--accent);}
+input[type=range]{width:100%;height:4px;border-radius:3px;outline:none;cursor:pointer;accent-color:var(--accent);background:var(--surface2);}
+
+.btn-apply{width:100%;padding:10px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.2px;}
+.btn-apply:hover{background:var(--accent-mid);transform:translateY(-1px);}
+.btn-apply:active{transform:translateY(0);}
+
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.stat-num{font-size:22px;font-weight:700;}
+.stat-label{font-size:11px;color:var(--text-muted);margin-top:2px;}
+
+.sort-bar{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.sort-label{font-size:12px;color:var(--text-muted);font-weight:500;}
+.btn-sort{padding:5px 13px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text-muted);font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;}
+.btn-sort:hover{border-color:var(--accent);color:var(--accent);}
+.btn-sort.active{background:var(--accent);color:white;border-color:var(--accent);}
+
+.train-card{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:16px 18px;margin-bottom:11px;transition:all .2s;cursor:default;}
+.train-card:hover{border-color:var(--accent);box-shadow:var(--shadow-md);}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;gap:8px;}
+.train-name{font-size:15px;font-weight:700;color:var(--text);}
+.train-sub{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;border:1px solid transparent;}
+.badge-green{background:var(--green-bg);color:var(--green);border-color:var(--green-border);}
+.badge-amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);}
+.badge-red{background:var(--red-bg);color:var(--red);border-color:var(--red-border);}
+
+.travel-row{display:flex;align-items:center;gap:10px;margin-bottom:11px;}
+.time-big{font-size:19px;font-weight:700;color:var(--text);white-space:nowrap;}
+.dur-line{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.dur-text{font-size:11px;color:var(--text-muted);font-weight:600;}
+.track{width:100%;height:2px;background:var(--border);position:relative;border-radius:2px;}
+.track::before{content:'';position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;border:2px solid var(--accent);background:var(--surface);}
+.track::after{content:'';position:absolute;right:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--accent);}
+
+.meta-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.meta-pill{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--text-muted);}
+
+.score-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.score-lbl{font-size:11px;color:var(--text-muted);white-space:nowrap;}
+.score-track{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;border:1px solid var(--border);}
+.score-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+.score-num{font-size:13px;font-weight:700;min-width:34px;text-align:right;}
+
+.card-foot{display:flex;justify-content:space-between;align-items:center;padding-top:11px;border-top:1px solid var(--border);}
+.price{font-size:16px;font-weight:700;}
+.price-lbl{font-size:10.5px;color:var(--text-muted);}
+.card-actions{display:flex;gap:7px;}
+.btn-small{padding:6px 13px;border:1px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text-muted);font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;}
+.btn-small:hover{border-color:var(--accent);color:var(--accent);}
+.btn-cmp{border-color:var(--accent);color:var(--accent);background:transparent;}
+.btn-cmp:hover,.btn-cmp.selected{background:var(--accent);color:white;}
+.excl-tag{font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:1px solid;border-color:var(--accent-light);padding:2px 7px;border-radius:4px;margin-left:6px;}
+
+.no-results{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:50px 20px;text-align:center;color:var(--text-muted);}
+
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;z-index:150;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 -4px 12px rgba(0,0,0,.08);}
+.bottom-bar.visible{transform:translateY(0);}
+.cmp-info{font-size:13px;color:var(--text-muted);}
+.btn-do-cmp{padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;}
+.btn-do-cmp:hover{background:var(--accent-mid);}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.48);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:620px;max-height:92vh;overflow-y:auto;padding:22px 24px;transform:translateY(12px) scale(.97);transition:transform .2s;}
+.modal-overlay.open .modal{transform:none;}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.modal-title{font-size:15px;font-weight:700;}
+.btn-close{width:28px;height:28px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);line-height:1;}
+.btn-close:hover{color:var(--text);}
+
+.cmp-tbl{width:100%;border-collapse:collapse;}
+.cmp-tbl th,.cmp-tbl td{padding:9px 10px;text-align:center;border-bottom:1px solid var(--border);}
+.cmp-tbl th:first-child,.cmp-tbl td:first-child{text-align:left;color:var(--text-muted);font-weight:500;font-size:12px;padding-left:0;}
+.cmp-tbl th{font-size:13px;font-weight:700;padding-top:0;}
+.winner{color:var(--green);font-weight:700;}
+.cmp-note{margin-top:14px;background:var(--surface2);border-radius:9px;padding:12px;font-size:12.5px;color:var(--text-muted);border:1px solid var(--border);}
+
+.ai-sec{margin-bottom:22px;}
+.ai-sec-title{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;}
+.decision-box{background:var(--surface2);border-radius:9px;padding:14px;font-size:12px;border:1px solid var(--border);}
+.tree-row{padding:4px 0;padding-left:18px;position:relative;color:var(--text-muted);line-height:1.6;}
+.tree-row::before{content:'├─';position:absolute;left:0;color:var(--text-subtle);}
+.tree-row:last-of-type::before{content:'└─';}
+.tree-pass{color:var(--green);font-weight:600;}
+.tree-fail{color:var(--red);font-weight:600;}
+.mf-legend{display:flex;gap:14px;margin-bottom:8px;flex-wrap:wrap;}
+.mf-dot-row{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);}
+.mf-dot{width:14px;height:3px;border-radius:2px;}
+.chart-wrap{position:relative;width:100%;}
+
+.loader-wrap { text-align:center; padding:50px 20px; color:var(--text-muted); }
+.spinner { width:40px; height:40px; border:4px solid var(--surface2); border-top:4px solid var(--accent); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 15px; }
+@keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
+.advice-box { background:var(--accent-light); border-left:4px solid var(--accent); padding:10px 14px; margin-top:12px; border-radius:4px 8px 8px 4px; font-size:11.5px; color:var(--text); line-height:1.5; }
+.math-box { background:#1e1e1e; color:#00ff00; font-family:monospace; padding:12px; border-radius:8px; font-size:12px; overflow-x:auto; margin-top:8px; line-height:1.6; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="5" width="18" height="13" rx="3" stroke="white" stroke-width="2"/>
+        <line x1="3" y1="11" x2="21" y2="11" stroke="white" stroke-width="1.5"/>
+        <circle cx="8" cy="15" r="1.2" fill="white"/>
+        <circle cx="16" cy="15" r="1.2" fill="white"/>
+        <path d="M8 18L6 21M16 18L18 21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-name">SmartRail</div>
+      <div class="logo-sub">Asisten Efisiensi Perjalanan Kereta</div>
+    </div>
+  </a>
+  <div class="header-right">
+    <button class="btn-icon" onclick="openModal('ai-modal')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg>
+      Analisis AI
+    </button>
+    <button class="btn-icon btn-theme" onclick="toggleTheme()" id="theme-btn" title="Ganti tema">🌙</button>
+  </div>
+</header>
+
+<div class="main">
+  <aside class="sidebar">
+    <div class="filter-block">
+      <div class="section-head">
+        <span class="section-title">Sistem Pakar</span>
+        <span class="section-tag">Hard Constraints</span>
+      </div>
+
+      <label class="filter-label">📍 Stasiun Keberangkatan</label>
+      <select id="f-origin">
+        <option value="all">Semua Stasiun Jakarta</option>
+        <option value="Gambir">Jakarta Gambir</option>
+        <option value="Pasar Senen">Jakarta Pasar Senen</option>
+      </select>
+      <div style="font-size:11px;color:var(--text-subtle);text-align:center;margin:-2px 0 10px">→ menuju Purwokerto</div>
+
+      <label class="filter-label">🚂 Kelas Kereta</label>
+      <div class="check-group" id="f-kelas">
+        <label class="check-item"><input type="checkbox" value="Eksekutif" checked><span>Eksekutif</span></label>
+        <label class="check-item"><input type="checkbox" value="Bisnis" checked><span>Bisnis</span></label>
+        <label class="check-item"><input type="checkbox" value="Ekonomi" checked><span>Ekonomi</span></label>
+      </div>
+
+      <label class="filter-label" style="margin-top:11px;">🌓 Waktu Keberangkatan</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" data-val="all" onclick="setWaktu(this)">Siang &amp; Malam</button>
+        <button class="toggle-btn" data-val="siang" onclick="setWaktu(this)">Hanya Siang</button>
+      </div>
+    </div>
+
+    <div class="filter-block">
+      <div class="section-head">
+        <span class="section-title">Sistem Fuzzy</span>
+        <span class="section-tag">Preferensi</span>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-head">
+          <span class="slider-lbl">💰 Batas Harga</span>
+          <span class="slider-val" id="v-harga">Rp 600rb</span>
+        </div>
+        <input type="range" id="sl-harga" min="50" max="700" value="600" step="10"
+          oninput="updSlider(this,'v-harga','harga')">
+      </div>
+      <div class="slider-group">
+        <div class="slider-head">
+          <span class="slider-lbl">⏱ Maks. Durasi</span>
+          <span class="slider-val" id="v-durasi">10 jam</span>
+        </div>
+        <input type="range" id="sl-durasi" min="3" max="12" value="10" step="0.5"
+          oninput="updSlider(this,'v-durasi','durasi')">
+      </div>
+      <div class="slider-group">
+        <div class="slider-head">
+          <span class="slider-lbl">⏳ Toleransi Tunggu</span>
+          <span class="slider-val" id="v-tunggu">2 jam</span>
+        </div>
+        <input type="range" id="sl-tunggu" min="0.5" max="4" value="2" step="0.25"
+          oninput="updSlider(this,'v-tunggu','tunggu')">
+      </div>
+    </div>
+
+    <button class="btn-apply" onclick="applyAll()">🔍 Terapkan & Skor Tiket</button>
+  </aside>
+
+  <div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="st-total">8</div>
+        <div class="stat-label">Jadwal Tersedia</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:var(--green)" id="st-rec">—</div>
+        <div class="stat-label">Sangat Direkomendasikan</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:var(--accent)" id="st-best">—</div>
+        <div class="stat-label">Skor Efisiensi Terbaik</div>
+      </div>
+    </div>
+
+    <div class="sort-bar">
+      <span class="sort-label">Urutkan:</span>
+      <button class="btn-sort active" onclick="setSort('score',this)">Skor Tertinggi</button>
+      <button class="btn-sort" onclick="setSort('price',this)">Harga Termurah</button>
+      <button class="btn-sort" onclick="setSort('time',this)">Jam Berangkat</button>
+      <button class="btn-sort" onclick="setSort('duration',this)">Durasi Terpendek</button>
+    </div>
+
+    <div id="train-list"></div>
+  </div>
+</div>
+
+<div class="bottom-bar" id="bottom-bar">
+  <span class="cmp-info">2 kereta dipilih untuk dibandingkan</span>
+  <div style="display:flex;gap:8px">
+    <button class="btn-small" onclick="clearCompare()">Batal</button>
+    <button class="btn-do-cmp" onclick="openModal('cmp-modal')">Bandingkan Sekarang →</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="cmp-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">⚖️ Perbandingan Tiket</div>
+      <button class="btn-close" onclick="closeModal('cmp-modal')">✕</button>
+    </div>
+    <div id="cmp-content"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ai-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">🤖 Analisis AI — Logika Sistem</div>
+      <button class="btn-close" onclick="closeModal('ai-modal')">✕</button>
+    </div>
+
+    <div class="ai-sec">
+      <div class="ai-sec-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        1. Sistem Pakar — Pohon Keputusan
+      </div>
+      <div class="decision-box" id="dt-content"></div>
+    </div>
+
+    <div class="ai-sec">
+      <div class="ai-sec-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        2. Fungsi Keanggotaan — Variabel Harga
+      </div>
+      <div class="mf-legend">
+        <div class="mf-dot-row"><div class="mf-dot" style="background:#16a34a"></div>Murah (≤Rp 150rb)</div>
+        <div class="mf-dot-row"><div class="mf-dot" style="background:#d97706;border-top:1px dashed #d97706;height:0"></div>Sedang (Rp 100–520rb)</div>
+        <div class="mf-dot-row"><div class="mf-dot" style="background:#dc2626"></div>Mahal (≥Rp 380rb)</div>
+      </div>
+      <div class="chart-wrap" style="height:170px"><canvas id="ch-harga" role="img" aria-label="Fungsi keanggotaan fuzzy variabel harga">Grafik membership function harga: murah, sedang, mahal.</canvas></div>
+    </div>
+
+    <div class="ai-sec">
+      <div class="ai-sec-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        3. Fungsi Keanggotaan — Variabel Durasi
+      </div>
+      <div class="mf-legend">
+        <div class="mf-dot-row"><div class="mf-dot" style="background:#16a34a"></div>Cepat (≤5 jam)</div>
+        <div class="mf-dot-row"><div class="mf-dot" style="background:#d97706"></div>Sedang (5–9 jam)</div>
+        <div class="mf-dot-row"><div class="mf-dot" style="background:#dc2626"></div>Lama (≥7.5 jam)</div>
+      </div>
+      <div class="chart-wrap" style="height:170px"><canvas id="ch-durasi" role="img" aria-label="Fungsi keanggotaan fuzzy variabel durasi">Grafik membership function durasi: cepat, sedang, lama.</canvas></div>
+    </div>
+
+    <div class="ai-sec">
+      <div class="ai-sec-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        4. Skor Efisiensi Semua Jadwal Aktif
+      </div>
+      <div class="chart-wrap" style="height:220px"><canvas id="ch-score" role="img" aria-label="Bar chart skor efisiensi tiap jadwal kereta">Skor efisiensi tiap kereta.</canvas></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+
+let TRAINS = [];
+
+async function initApp() {
+  const container = document.getElementById('train-list');
+  container.innerHTML = `<div class="loader-wrap"><div class="spinner"></div><div>Memproses logika AI dari backend Python...</div></div>`;
+  
+  try {
+    const response = await fetch('/api/trains');
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+    
+    setTimeout(() => {
+      TRAINS = data;
+      applyAll();
+    }, 800);
+    
+  } catch (error) {
+    console.error("Gagal mengambil data:", error);
+    container.innerHTML = `
+      <div class="no-results">
+        <div style="font-size:44px;margin-bottom:14px">🔌</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:6px">Gagal Terhubung ke Python Backend</div>
+        <div style="font-size:12.5px;color:var(--text-subtle)">Error: ${error.message}<br>Pastikan Anda sudah menjalankan 'python app.py'</div>
+      </div>`;
+  }
+}
+
+let sortMode='score', waktuMode='all', cmpList=[], current=[];
+
+function applyAll(){
+  const origin=document.getElementById('f-origin').value;
+  const klasOK=[...document.querySelectorAll('#f-kelas input:checked')].map(i=>i.value);
+  const maxH=+document.getElementById('sl-harga').value*1000;
+  const maxD=+document.getElementById('sl-durasi').value;
+  const maxT=+document.getElementById('sl-tunggu').value;
+
+  let filtered=TRAINS.filter(t=>{
+    if(origin!=='all'&&t.stasiun!==origin)return false;
+    if(!klasOK.includes(t.kelas))return false;
+    if(waktuMode==='siang'&&t.malam)return false;
+    return true;
+  });
+
+  filtered=filtered.map(t=>{
+    let sc = t.score_base || 50; 
+    if(t.harga>maxH) sc = Math.max(0, sc-15);
+    if(t.durasi>maxD) sc = Math.max(0, sc-10);
+    if(t.tunggu>maxT) sc = Math.max(0, sc-8);
+    return{...t, score:sc};
+  });
+
+  current=filtered;
+  renderList();
+  updateStats();
+}
+
+function getLabel(s){
+  if(s>=68)return{txt:"Sangat Direkomendasikan",cls:"badge-green"};
+  if(s>=42)return{txt:"Cukup",cls:"badge-amber"};
+  return{txt:"Kurang Direkomendasikan",cls:"badge-red"};
+}
+function scoreColor(s){return s>=68?"#16a34a":s>=42?"#d97706":"#dc2626";}
+
+function setSort(m,btn){
+  sortMode=m;
+  document.querySelectorAll('.btn-sort').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+function sorted(list){
+  const c=[...list];
+  if(sortMode==='score')return c.sort((a,b)=>b.score-a.score);
+  if(sortMode==='price')return c.sort((a,b)=>a.harga-b.harga);
+  if(sortMode==='time')return c.sort((a,b)=>a.dep.localeCompare(b.dep));
+  if(sortMode==='duration')return c.sort((a,b)=>a.durasi-b.durasi);
+  return c;
+}
+
+function fmtDur(h){const hr=Math.floor(h);const mn=Math.round((h-hr)*60);return`${hr}j ${mn.toString().padStart(2,'0')}m`;}
+function fmtRp(n){return'Rp '+n.toLocaleString('id-ID');}
+function exclTag(t){
+  if(t.kelas==='Eksekutif'&&!t.malam&&t.durasi<7)return'⭐ Terbaik Istirahat';
+  if(t.score>=78)return'🔥 Value Terbaik';
+  if(t.harga<100000)return'💸 Paling Terjangkau';
+  if(t.durasi<6)return'⚡ Perjalanan Tercepat';
+  return null;
+}
+function metaPills(t){
+  const p=[];
+  if(t.harga<130000)p.push('💰 Harga Murah');
+  if(t.durasi<6.5)p.push('⚡ Perjalanan Cepat');
+  if(t.tunggu<=0.5)p.push('⏰ Tunggu Singkat');
+  p.push(t.malam?'🌙 Malam':'☀️ Siang');
+  p.push('🚂 '+t.kelas);
+  return p;
+}
+
+function renderList(){
+  const list=sorted(current);
+  const container=document.getElementById('train-list');
+  if(list.length===0){
+    container.innerHTML=`<div class="no-results"><div style="font-size:44px;margin-bottom:14px">🚫</div><div style="font-size:14px;font-weight:700;margin-bottom:6px">Tidak ada jadwal yang cocok</div><div style="font-size:12.5px;color:var(--text-subtle)">Ubah filter sistem pakar atau geser slider preferensi</div></div>`;
+    return;
+  }
+  container.innerHTML=list.map(t=>{
+    const lbl=getLabel(t.score);
+    const col=scoreColor(t.score);
+    const excl=exclTag(t);
+    const pills=metaPills(t);
+    const inCmp=cmpList.includes(t.id);
+    
+    const advice = t.advice || "✅ Jadwal dianalisis."; 
+    
+    return `<div class="train-card" id="card-${t.id}" style="animation: fadeIn 0.4s ease;">
+  <div class="card-top">
+    <div>
+      <span class="train-name">${t.nama}</span>${excl?`<span class="excl-tag">${excl}</span>`:''}
+      <div class="train-sub">Jakarta ${t.stasiun} → Purwokerto Kroya</div>
+    </div>
+    <span class="badge ${lbl.cls}">${lbl.txt}</span>
+  </div>
+  <div class="travel-row">
+    <span class="time-big">${t.dep}</span>
+    <div class="dur-line"><span class="dur-text">${fmtDur(t.durasi)}</span><div class="track"></div></div>
+    <span class="time-big">${t.arr}</span>
+  </div>
+  <div class="meta-row">${pills.map(p=>`<span class="meta-pill">${p}</span>`).join('')}</div>
+  <div class="score-row">
+    <span class="score-lbl">Skor Efisiensi</span>
+    <div class="score-track"><div class="score-fill" style="width:${t.score}%;background:${col}"></div></div>
+    <span class="score-num" style="color:${col}">${t.score}<span style="font-size:10px;font-weight:400;color:var(--text-subtle)">/100</span></span>
+  </div>
+  <div class="advice-box"><strong>Analisis Experta (Python):</strong><br>${advice}</div>
+  <div class="card-foot" style="margin-top:12px">
+    <div><div class="price">${fmtRp(t.harga)}</div><div class="price-lbl">per tiket</div></div>
+    <div class="card-actions">
+      <button class="btn-small btn-cmp ${inCmp?'selected':''}" onclick="toggleCmp(${t.id},this)">${inCmp?'✓ Dipilih':'+ Bandingkan'}</button>
+    </div>
+  </div>
+</div>`;
+  }).join('');
+}
+
+function updateStats(){
+  document.getElementById('st-total').textContent=current.length;
+  document.getElementById('st-rec').textContent=current.filter(t=>t.score>=68).length;
+  document.getElementById('st-best').textContent=current.length?Math.max(...current.map(t=>t.score)):'—';
+}
+
+function toggleCmp(id,btn){
+  if(cmpList.includes(id)){
+    cmpList=cmpList.filter(x=>x!==id);
+    btn.classList.remove('selected');btn.textContent='+ Bandingkan';
+  } else {
+    if(cmpList.length>=2){
+      const old=cmpList.shift();
+      const ob=document.querySelector(`#card-${old} .btn-cmp`);
+      if(ob){ob.classList.remove('selected');ob.textContent='+ Bandingkan';}
+    }
+    cmpList.push(id);btn.classList.add('selected');btn.textContent='✓ Dipilih';
+  }
+  document.getElementById('bottom-bar').classList.toggle('visible',cmpList.length===2);
+}
+function clearCompare(){
+  cmpList.forEach(id=>{const b=document.querySelector(`#card-${id} .btn-cmp`);if(b){b.classList.remove('selected');b.textContent='+ Bandingkan';}});
+  cmpList=[];
+  document.getElementById('bottom-bar').classList.remove('visible');
+}
+function buildCompare(){
+  const [a,b]=cmpList.map(id=>current.find(t=>t.id===id));
+  if(!a||!b)return;
+  const lA=getLabel(a.score),lB=getLabel(b.score);
+  const row=(label,va,vb,better)=>{
+    let wa='',wb='';
+    if(better==='lo'){wa=va<vb?'✅ ':'';wb=vb<va?'✅ ':'';}
+    else if(better==='hi'){wa=va>vb?'✅ ':'';wb=vb>va?'✅ ':'';}
+    return`<tr><td>${label}</td><td class="${wa?'winner':''}">${wa}${va}</td><td class="${wb?'winner':''}">${wb}${vb}</td></tr>`;
+  };
+  document.getElementById('cmp-content').innerHTML=`
+<table class="cmp-tbl">
+  <thead><tr><th style="text-align:left">Aspek</th><th>${a.nama}</th><th>${b.nama}</th></tr></thead>
+  <tbody>
+    ${row('Kelas',a.kelas,b.kelas,'none')}
+    ${row('Stasiun',a.stasiun,b.stasiun,'none')}
+    ${row('Berangkat',a.dep,b.dep,'none')}
+    ${row('Tiba',a.arr,b.arr,'none')}
+    ${row('Durasi',fmtDur(a.durasi),fmtDur(b.durasi),'lo')}
+    ${row('Waktu Tunggu',a.tunggu+'j',b.tunggu+'j','lo')}
+    ${row('Harga',fmtRp(a.harga),fmtRp(b.harga),'lo')}
+    ${row('Skor Efisiensi',a.score+'/100',b.score+'/100','hi')}
+    ${row('Rekomendasi',lA.txt,lB.txt,'none')}
+  </tbody>
+</table>
+<div class="cmp-note">💡 Sistem merekomendasikan <strong>${a.score>=b.score?a.nama:b.nama}</strong> (skor ${Math.max(a.score,b.score)}/100) berdasarkan kalkulasi fuzzy.</div>`;
+}
+
+function trapL(x,c,d){if(x<=c)return 1;if(x>=d)return 0;return(d-x)/(d-c);}
+function trapR(x,a,b){if(x<=a)return 0;if(x>=b)return 1;return(x-a)/(b-a);}
+function tri(x,a,b,c){if(x<=a||x>=c)return 0;if(x===b)return 1;if(x<b)return(x-a)/(b-a);return(c-x)/(c-b);}
+
+let aiCharts={};
+function buildAI(){
+  const origin=document.getElementById('f-origin').value;
+  const klasOK=[...document.querySelectorAll('#f-kelas input:checked')].map(i=>i.value);
+  const eliminated=TRAINS.filter(t=>{
+    if(origin!=='all'&&t.stasiun!==origin)return true;
+    if(!klasOK.includes(t.kelas))return true;
+    if(waktuMode==='siang'&&t.malam)return true;
+    return false;
+  });
+  const elim=eliminated.map(t=>{
+    let why='';
+    if(origin!=='all'&&t.stasiun!==origin)why=`stasiun ${t.stasiun} ≠ ${origin}`;
+    else if(!klasOK.includes(t.kelas))why=`kelas ${t.kelas} tidak dipilih`;
+    else why='kereta malam (filter Hanya Siang)';
+    return`<div class="tree-row"><span class="tree-fail">✗ ${t.nama}</span> — ${why}</div>`;
+  }).join('');
+
+  document.getElementById('dt-content').innerHTML=`
+<div style="margin-bottom:8px;font-size:12px;color:var(--text)"><strong>Filter Aktif:</strong></div>
+<div class="tree-row">Stasiun: ${origin==='all'?'Semua':origin}</div>
+<div class="tree-row">Kelas diterima: ${klasOK.join(', ')}</div>
+<div class="tree-row">Waktu: ${waktuMode==='siang'?'Hanya Siang':'Siang &amp; Malam'}</div>
+${eliminated.length?`<div style="margin:10px 0 6px;font-size:12px;color:var(--red)"><strong>❌ Dieliminasi (${eliminated.length}):</strong></div>${elim}`:''}
+<div style="margin-top:10px;font-size:12px" class="tree-pass">✅ ${current.length} jadwal lolos → diproses backend Python</div>`;
+
+  Object.values(aiCharts).forEach(c=>c.destroy());
+  aiCharts={};
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  const tc=dark?'#94a3b8':'#6b7280';
+  const gc=dark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.06)';
+  const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:10}},grid:{color:gc}},y:{min:0,max:1.1,ticks:{color:tc,font:{size:10}},grid:{color:gc}}}};
+
+  const hPts=Array.from({length:71},(_,i)=>i*10);
+  aiCharts.h=new Chart(document.getElementById('ch-harga'),{type:'line',
+    data:{labels:hPts.map(x=>x+'rb'),datasets:[
+      {label:'Murah',borderColor:'#16a34a',backgroundColor:'rgba(22,163,74,.1)',data:hPts.map(x=>trapL(x,150,350)),borderWidth:2,pointRadius:0,fill:true,tension:0},
+      {label:'Sedang',borderColor:'#d97706',backgroundColor:'rgba(217,119,6,.1)',data:hPts.map(x=>tri(x,100,280,520)),borderWidth:2,pointRadius:0,fill:true,tension:0,borderDash:[5,3]},
+      {label:'Mahal',borderColor:'#dc2626',backgroundColor:'rgba(220,38,38,.1)',data:hPts.map(x=>Math.min(trapR(x,380,550),1)),borderWidth:2,pointRadius:0,fill:true,tension:0,borderDash:[2,2]},
+    ]},options:{...opts,scales:{...opts.scales,x:{...opts.scales.x,ticks:{...opts.scales.x.ticks,maxTicksLimit:8}}}}
+  });
+
+  const dPts=Array.from({length:121},(_,i)=>+(i*0.1).toFixed(1));
+  aiCharts.d=new Chart(document.getElementById('ch-durasi'),{type:'line',
+    data:{labels:dPts.map(x=>x+'j'),datasets:[
+      {label:'Cepat',borderColor:'#16a34a',backgroundColor:'rgba(22,163,74,.1)',data:dPts.map(x=>trapL(x,5,7)),borderWidth:2,pointRadius:0,fill:true,tension:0},
+      {label:'Sedang',borderColor:'#d97706',backgroundColor:'rgba(217,119,6,.1)',data:dPts.map(x=>tri(x,5,6.5,9)),borderWidth:2,pointRadius:0,fill:true,tension:0,borderDash:[5,3]},
+      {label:'Lama',borderColor:'#dc2626',backgroundColor:'rgba(220,38,38,.1)',data:dPts.map(x=>Math.min(trapR(x,7.5,9),1)),borderWidth:2,pointRadius:0,fill:true,tension:0,borderDash:[2,2]},
+    ]},options:{...opts,scales:{...opts.scales,x:{...opts.scales.x,ticks:{...opts.scales.x.ticks,maxTicksLimit:10}}}}
+  });
+
+  const sl=sorted(current);
+  if(sl.length>0){
+    const colors=sl.map(t=>scoreColor(t.score));
+    aiCharts.s=new Chart(document.getElementById('ch-score'),{type:'bar',
+      data:{labels:sl.map(t=>t.nama.length>14?t.nama.slice(0,14)+'…':t.nama),
+        datasets:[{label:'Skor',data:sl.map(t=>t.score),backgroundColor:colors.map(c=>c+'bb'),borderColor:colors,borderWidth:1,borderRadius:5}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{x:{ticks:{color:tc,font:{size:10}},grid:{color:gc}},y:{min:0,max:100,ticks:{color:tc,font:{size:10}},grid:{color:gc}}}}
+    });
+    
+    const bestTrain = sl[0];
+    const calcHTML = `
+    <div class="ai-sec math-container" style="margin-top:20px">
+      <div class="ai-sec-title">🧠 5. Eksekusi scikit-fuzzy Python (Centroid)</div>
+      <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">
+        Skor untuk tiket <strong>${bestTrain.nama}</strong>:
+      </div>
+      <div class="math-box">
+        // Defuzzifikasi diproses di backend Flask<br>
+        Z* = (∫ µc(z) · z dz) / (∫ µc(z) dz)<br><br>
+        > Hasil Defuzzifikasi Sistem:<br>
+        > Skor Akhir = <span style="color:#fff; font-weight:bold; font-size:14px">${bestTrain.score} / 100</span>
+      </div>
+    </div>`;
+    
+    const modalContent = document.querySelector('#ai-modal .modal');
+    if(!document.querySelector('.math-container')) {
+      modalContent.insertAdjacentHTML('beforeend', calcHTML);
+    } else {
+      document.querySelector('.math-container').innerHTML = `
+      <div class="ai-sec-title">🧠 5. Eksekusi scikit-fuzzy Python (Centroid)</div>
+      <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">
+        Skor untuk tiket <strong>${bestTrain.nama}</strong>:
+      </div>
+      <div class="math-box">
+        // Defuzzifikasi diproses di backend Flask<br>
+        Z* = (∫ µc(z) · z dz) / (∫ µc(z) dz)<br><br>
+        > Hasil Defuzzifikasi Sistem:<br>
+        > Skor Akhir = <span style="color:#fff; font-weight:bold; font-size:14px">${bestTrain.score} / 100</span>
+      </div>`;
+    }
+  }
+}
+
+function setWaktu(btn){
+  waktuMode=btn.getAttribute('data-val');
+  document.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function updSlider(input,labelId,type){
+  const v=+input.value;
+  const el=document.getElementById(labelId);
+  if(type==='harga')el.textContent=`Rp ${v}rb`;
+  else el.textContent=`${v} jam`;
+}
+function toggleTheme(){
+  const html=document.documentElement;
+  const dark=html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme',dark?'light':'dark');
+  document.getElementById('theme-btn').textContent=dark?'🌙':'☀️';
+}
+function openModal(id){
+  if(id==='cmp-modal'&&cmpList.length===2)buildCompare();
+  if(id==='ai-modal')buildAI();
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+
+initApp();
+</script>
+</body>
+</html>
