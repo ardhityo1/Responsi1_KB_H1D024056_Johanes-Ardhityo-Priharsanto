@@ -1,6 +1,5 @@
 import collections
 import collections.abc
-# KODE AJAIB: Memperbaiki bug library 'experta' di Python 3.10+
 collections.Mapping = collections.abc.Mapping 
 
 from flask import Flask, jsonify, render_template
@@ -13,9 +12,9 @@ from experta import *
 app = Flask(__name__)
 
 
-harga = ctrl.Antecedent(np.arange(0, 701, 1), 'harga') # dalam ribuan
-durasi = ctrl.Antecedent(np.arange(0, 13, 0.1), 'durasi') # dalam jam
-tunggu = ctrl.Antecedent(np.arange(0, 7, 0.1), 'tunggu') # dalam jam
+harga = ctrl.Antecedent(np.arange(0, 701, 1), 'harga') 
+durasi = ctrl.Antecedent(np.arange(0, 13, 0.1), 'durasi') 
+tunggu = ctrl.Antecedent(np.arange(0, 7, 0.1), 'tunggu')
 skor = ctrl.Consequent(np.arange(0, 101, 1), 'skor')
 
 harga['murah'] = fuzz.trapmf(harga.universe, [0, 0, 150, 350])
