@@ -3,7 +3,6 @@ import collections.abc
 collections.Mapping = collections.abc.Mapping 
 
 from flask import Flask, jsonify, render_template
-import mysql.connector
 import numpy as np
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
@@ -65,13 +64,17 @@ class PakarKereta(KnowledgeEngine):
         self.saran.append("⚡ Waktu tunggu mepet! Pastikan tiba di stasiun min. 45 menit sebelum keberangkatan.")
 
 
-def get_db_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="responsi1_kb"
-    )
+# Data kereta statis (pengganti database MySQL)
+STATIC_TRAINS = [
+    {"id": 1, "nama": "Serayu Pagi",     "stasiun": "Pasar Senen", "dep": "06:00", "arr": "12:45", "kelas": "Ekonomi",   "harga": 69000,  "durasi": 6.75, "tunggu": 0.5,  "malam": False},
+    {"id": 2, "nama": "Sawunggalih Utama","stasiun": "Gambir",      "dep": "07:30", "arr": "12:50", "kelas": "Eksekutif", "harga": 280000, "durasi": 5.33, "tunggu": 1.0,  "malam": False},
+    {"id": 3, "nama": "Logawa",           "stasiun": "Pasar Senen", "dep": "08:15", "arr": "15:30", "kelas": "Ekonomi",   "harga": 79000,  "durasi": 7.25, "tunggu": 1.5,  "malam": False},
+    {"id": 4, "nama": "Purwojaya",        "stasiun": "Gambir",      "dep": "09:00", "arr": "14:10", "kelas": "Eksekutif", "harga": 310000, "durasi": 5.17, "tunggu": 0.75, "malam": False},
+    {"id": 5, "nama": "Wijayakusuma",     "stasiun": "Gambir",      "dep": "15:00", "arr": "20:15", "kelas": "Bisnis",    "harga": 175000, "durasi": 5.25, "tunggu": 1.25, "malam": False},
+    {"id": 6, "nama": "Serayu Malam",     "stasiun": "Pasar Senen", "dep": "21:00", "arr": "04:30", "kelas": "Ekonomi",   "harga": 69000,  "durasi": 7.5,  "tunggu": 0.5,  "malam": True },
+    {"id": 7, "nama": "Bima",             "stasiun": "Gambir",      "dep": "17:00", "arr": "23:20", "kelas": "Eksekutif", "harga": 480000, "durasi": 6.33, "tunggu": 2.0,  "malam": False},
+    {"id": 8, "nama": "Fajar Utama",      "stasiun": "Pasar Senen", "dep": "05:30", "arr": "11:00", "kelas": "Bisnis",    "harga": 145000, "durasi": 5.5,  "tunggu": 0.5,  "malam": False},
+]
 
 @app.route('/')
 def home():
@@ -80,50 +83,39 @@ def home():
 @app.route('/api/trains', methods=['GET'])
 def get_trains():
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM trains")
-        trains = cursor.fetchall()
-        
+        import copy
+        trains = copy.deepcopy(STATIC_TRAINS)
+
         mesin_pakar = PakarKereta()
 
         for t in trains:
-
-            mesin_fuzzy.input['harga'] = int(t['harga']) / 1000
+            mesin_fuzzy.input['harga'] = t['harga'] / 1000
             mesin_fuzzy.input['durasi'] = float(t['durasi'])
             mesin_fuzzy.input['tunggu'] = float(t['tunggu'])
-            
+
             try:
                 mesin_fuzzy.compute()
                 t['score_base'] = round(mesin_fuzzy.output['skor'])
             except:
-                t['score_base'] = 50 
+                t['score_base'] = 50
 
             mesin_pakar.reset()
-            mesin_pakar.saran = [] 
+            mesin_pakar.saran = []
             mesin_pakar.declare(FaktaKereta(
-                kelas=t['kelas'], 
-                durasi=float(t['durasi']), 
-                malam=bool(t['malam']), 
+                kelas=t['kelas'],
+                durasi=float(t['durasi']),
+                malam=bool(t['malam']),
                 tunggu=float(t['tunggu'])
             ))
             mesin_pakar.run()
-            
+
             if len(mesin_pakar.saran) == 0:
                 t['advice'] = "✅ Jadwal sangat ideal. Pastikan dokumen perjalanan Anda sudah siap."
             else:
                 t['advice'] = "<br>".join(mesin_pakar.saran)
 
-            t['malam'] = bool(t['malam'])
-            t['harga'] = int(t['harga'])
-            t['durasi'] = float(t['durasi'])
-            t['tunggu'] = float(t['tunggu'])
-            
-        cursor.close()
-        conn.close()
-        
         return jsonify(trains)
-    
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
