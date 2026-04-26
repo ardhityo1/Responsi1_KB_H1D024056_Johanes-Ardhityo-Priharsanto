@@ -1,14 +1,10 @@
-# SmartRail — Asisten Efisiensi Perjalanan Kereta
-
 Aplikasi ini menggunakan **Logika Fuzzy** dan **Sistem Pakar** untuk memberikan rekomendasi tiket kereta api terbaik berdasarkan harga, durasi perjalanan, dan waktu tunggu.
 
-Untuk memastikan aplikasi ini bisa di-deploy dengan lancar di **Vercel** (serverless environment), kami telah menghapus library berat (`scikit-fuzzy` dan `experta`) beserta koneksi database MySQL, dan menggantinya dengan implementasi **Pure Python**.
+##Letak Logika AI di Kode (`app.py`)
 
-## 📌 Letak Logika AI di Kode (`app.py`)
+Rincian letak bagian logika fuzzy dan logika sistem pakar
 
-Seluruh algoritma AI telah ditulis ulang ke dalam fungsi dasar Python di file `app.py`. Berikut adalah rinciannya:
-
-### 1. Logika Fuzzy (Mamdani)
+### 1. Logika Fuzzy
 Logika Fuzzy digunakan untuk menghitung **Skor Efisiensi (0-100)** dari setiap tiket kereta.
 - **Letak Fungsi:** `fuzzy_score(harga_ribu, durasi, tunggu)` (Baris ke-33 di `app.py`)
 - **Fungsi Keanggotaan (Membership):** Menggunakan fungsi kustom `trapmf()` (Trapesium) dan `trimf()` (Segitiga) untuk variabel Harga, Durasi, dan Waktu Tunggu.
@@ -28,15 +24,3 @@ Karena MySQL tidak bisa diakses dari Vercel tanpa cloud hosting tambahan, data k
 
 ---
 
-## 🚀 Cara Menjalankan Secara Lokal
-
-1. Pastikan Anda memiliki Python yang sudah ter-install.
-2. Install framework web (Flask):
-   ```bash
-   pip install Flask
-   ```
-3. Jalankan aplikasi:
-   ```bash
-   python app.py
-   ```
-4. Buka browser dan pergi ke `http://localhost:5000`
